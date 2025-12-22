@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NUM-TRACKER v10.0 | MOBILE OPTIMIZED</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+<style>
+:root {
+    --bg: #050814;
+    --panel: rgba(15,23,42,0.95);
+    --glass: rgba(15,23,42,0.7);
+    --border: rgba(148,163,184,0.4);
+    --accent: #00E1FF;
+    --accent2: #00FFC6;
+    --text: #E5F0FF;
+    --muted: #94A3B8;
+    --success: #22C55E;
+    --danger: #FB7185;
+    --warning: #FBBF24;
+    --radius: 14px;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+/* ===== GLOBAL BACKGROUND ===== */
+body {
+    margin: 0;
+    padding: 0;
+    background: radial-gradient(circle at 20% 0%, #0ea5e9 0, transparent 55%),
+                radial-gradient(circle at 80% 100%, #22c55e22 0, transparent 55%),
+                #020617;
+    color: var(--text);
+    overflow-x: hidden; /* Prevent horizontal scroll */
+}
+
+/* Moving grid */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(148,163,184,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(148,163,184,0.06) 1px, transparent 1px);
+    background-size: 42px 42px;
+    opacity: 0.9;
+    animation: gridMove 30s linear infinite;
+    pointer-events: none;
+    z-index: -2;
+}
+@keyframes gridMove {
+    from { transform: translate3d(0,0,0); }
+    to   { transform: translate3d(-42px,-42px,0); }
+}
+
+/* Soft glow layer */
+body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(circle at 10% 90%, rgba(56,189,248,0.25), transparent 60%),
+      radial-gradient(circle at 90% 10%, rgba(34,197,94,0.18), transparent 60%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* ===== ADMIN LOGIN OVERLAY ===== */
+#adminLogin {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at 20% 0%, rgba(56,189,248,0.35), transparent 55%),
+                radial-gradient(circle at 80% 100%, rgba(34,197,94,0.35), transparent 55%),
+                #020617f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+#adminLogin.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease-out;
+}
+
+.login-card {
+    width: 320px;
+    max-width: 90vw;
+    background: rgba(15,23,42,0.95);
+    border-radius: 18px;
+    border: 1px solid rgba(148,163,184,0.45);
+    box-shadow: 0 20px 45px rgba(15,23,42,0.95);
+    padding: 22px 20px 18px;
+    position: relative;
+    overflow: hidden;
+}
+
+.login-card::before {
+    content: "";
+    position: absolute;
+    inset: -40%;
+    background:
+      radial-gradient(circle at 0 0, rgba(56,189,248,0.22), transparent 55%),
+      radial-gradient(circle at 100% 100%, rgba(34,197,94,0.18), transparent 55%);
+    opacity: 0.9;
+    pointer-events: none;
+}
+
+.login-inner { position: relative; z-index: 1; }
+
+.login-title { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+.login-title-icon {
+    width: 30px; height: 30px; border-radius: 999px;
+    background: radial-gradient(circle at 30% 0%, #e0f2fe, #0284c7);
+    display: flex; align-items: center; justify-content: center;
+    color: #020617; box-shadow: 0 0 18px rgba(56,189,248,0.9);
+}
+.login-title-text { font-size: 16px; font-weight: 600; }
+.login-sub { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 16px; }
+.login-field-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+.login-input {
+    width: 100%; background: #020617; border-radius: 999px;
+    border: 1px solid rgba(148,163,184,0.5); padding: 9px 12px;
+    font-size: 13px; color: var(--text); outline: none; margin-bottom: 10px; box-sizing: border-box;
+}
+.login-input:focus { border-color: var(--accent); box-shadow: 0 0 0 1px rgba(56,189,248,0.6); }
+.login-btn {
+    width: 100%; margin-top: 4px; padding: 10px 12px; border-radius: 999px; border: none;
+    background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #020617;
+    font-weight: 600; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center;
+    justify-content: center; gap: 8px; box-shadow: 0 12px 28px rgba(8,47,73,0.95);
+}
+.login-error { margin-top: 6px; font-size: 11px; color: var(--danger); min-height: 14px; }
+.login-meta { margin-top: 8px; font-size: 10px; color: var(--muted); display: flex; justify-content: space-between; }
+.shake { animation: shake 0.35s ease; }
+@keyframes shake {
+    0% { transform: translateX(0); } 25% { transform: translateX(-6px); }
+    50% { transform: translateX(6px); } 75% { transform: translateX(-4px); } 100% { transform: translateX(0); }
+}
+
+/* ===== APP LAYOUT ===== */
+.app {
+    display: none;
+    min-height: 100vh;
+}
+.app.visible { display: flex; }
+
+/* ===== MOBILE HEADER (NEW) ===== */
+.mobile-header {
+    display: none; /* Hidden on desktop */
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 60px;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    z-index: 100;
+    align-items: center;
+    padding: 0 20px;
+    justify-content: space-between;
+}
+.mobile-menu-btn {
+    background: transparent; border: none; color: var(--text); font-size: 20px; cursor: pointer;
+}
+.mobile-logo-text { font-weight: 700; font-size: 16px; letter-spacing: 1px; color: var(--accent); }
+
+/* SIDEBAR */
+.sidebar {
+    width: 260px;
+    padding: 22px 18px;
+    border-right: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(15,23,42,0.98), rgba(15,23,42,0.95));
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    overflow-y: auto;
+    z-index: 200;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.logo { display: flex; align-items: center; gap: 10px; margin-bottom: 32px; }
+.logo-icon {
+    width: 32px; height: 32px; border-radius: 999px;
+    background: radial-gradient(circle at 30% 0%, #e0f2fe, #0ea5e9);
+    display: flex; align-items: center; justify-content: center;
+    color: #0b1120; box-shadow: 0 0 18px rgba(56,189,248,0.9);
+}
+.logo-text-main { font-size: 16px; font-weight: 600; }
+.logo-text-sub { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; }
+
+.menu-item {
+    padding: 10px 12px; border-radius: 999px; display: flex; align-items: center;
+    gap: 10px; color: var(--muted); font-size: 13px; cursor: pointer;
+    margin-bottom: 6px; transition: 0.18s;
+}
+.menu-item i { font-size: 14px; width: 20px; text-align: center; }
+.menu-item:hover { background: rgba(15,23,42,0.95); color: var(--text); }
+.menu-item.active {
+    background: radial-gradient(circle at 0 0, rgba(56,189,248,0.6), transparent 65%);
+    color: var(--accent); box-shadow: 0 0 16px rgba(56,189,248,0.6);
+}
+
+.sidebar-footer {
+    margin-top: auto; font-size: 11px; color: var(--muted);
+    padding-top: 8px; border-top: 1px dashed rgba(148,163,184,0.4);
+}
+
+.social-links { margin-top: 15px; display: flex; flex-direction: column; gap: 8px; }
+.social-link {
+    display: flex; align-items: center; gap: 10px; padding: 8px 10px;
+    border-radius: 8px; background: rgba(2, 8, 23, 0.7); border: 1px solid rgba(56, 189, 248, 0.2);
+    color: var(--muted); font-size: 11px; text-decoration: none; transition: 0.2s;
+}
+.social-link:hover {
+    background: rgba(56, 189, 248, 0.1); color: var(--accent); border-color: rgba(56, 189, 248, 0.4);
+}
+.social-link i { width: 16px; text-align: center; }
+
+/* CLOSE BUTTON (Mobile Only) */
+.close-sidebar-btn {
+    display: none; position: absolute; top: 15px; right: 15px;
+    background: transparent; border: none; color: var(--muted); font-size: 18px; cursor: pointer;
+}
+
+/* MAIN CONTENT */
+.main { flex: 1; padding: 22px 28px 40px; overflow-x: hidden; width: 100%; box-sizing: border-box; }
+
+.topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; }
+.top-title { font-size: 18px; font-weight: 600; }
+.top-sub { font-size: 12px; color: var(--muted); }
+
+.status-pill {
+    display: inline-flex; align-items: center; gap: 6px; padding: 6px 11px;
+    border-radius: 999px; border: 1px solid rgba(34,197,94,0.4); background: rgba(22,163,74,0.16);
+    font-size: 11px; color: var(--success);
+}
+.status-dot { width: 8px; height: 8px; border-radius: 999px; background: var(--success); box-shadow: 0 0 10px rgba(34,197,94,1); }
+
+/* GRID */
+.grid-2 { display: grid; grid-template-columns: minmax(0,2fr) minmax(0,1.2fr); gap: 18px; }
+
+/* ===== MEDIA QUERIES FOR MOBILE ===== */
+@media (max-width: 900px) {
+    .app { flex-direction: column; margin-top: 60px; /* Space for header */ }
+    
+    .mobile-header { display: flex; } /* Show header */
+    
+    .sidebar {
+        position: fixed;
+        left: 0; top: 0; bottom: 0;
+        transform: translateX(-100%); /* Hide Sidebar */
+        z-index: 1000;
+        width: 280px; /* Standard drawer width */
+        box-shadow: 5px 0 25px rgba(0,0,0,0.8);
+    }
+    
+    .sidebar.active { transform: translateX(0); /* Show Sidebar */ }
+    
+    .close-sidebar-btn { display: block; } /* Show X button */
+    
+    /* Overlay for darkening background */
+    .menu-overlay {
+        position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(3px);
+        z-index: 900; display: none;
+    }
+    .menu-overlay.active { display: block; }
+    
+    .main { padding: 14px; }
+    .grid-2 { grid-template-columns: 1fr; }
+    
+    /* Topbar adjustments */
+    .topbar { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .status-pill { align-self: flex-start; }
+}
+
+/* CARDS & INPUTS */
+.card {
+    background: var(--panel); border-radius: var(--radius); border: 1px solid var(--border);
+    padding: 18px 18px 16px; box-shadow: 0 18px 35px rgba(15,23,42,0.95);
+    position: relative; overflow: hidden;
+}
+.card::before {
+    content:""; position:absolute; inset:-40%;
+    background: radial-gradient(circle at 0 0, rgba(56,189,248,0.18), transparent 60%),
+                radial-gradient(circle at 100% 100%, rgba(16,185,129,0.15), transparent 60%);
+    opacity:0.7; pointer-events:none;
+}
+.card-inner { position:relative; z-index:1; }
+.card-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.card-title { display:flex; align-items:center; gap:8px; font-size:14px; font-weight:500; }
+.card-title i { color:var(--accent); }
+.input-label { font-size:12px; color:var(--muted); margin-bottom:4px; }
+.input-box {
+    width: 100%; background: #020617; border: 1px solid rgba(148,163,184,0.5);
+    border-radius: 999px; color: var(--text); padding: 11px 13px; font-size: 14px;
+    outline: none; font-family: monospace; box-sizing: border-box;
+}
+.input-box:focus { border-color: var(--accent); }
+
+.action-btn {
+    width: 100%; margin-top: 12px; padding: 11px 14px; border-radius: 999px; border: none;
+    background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #020617;
+    font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; justify-content: center;
+    gap: 8px; cursor: pointer; box-shadow: 0 10px 24px rgba(8,47,73,0.9); transition: 0.16s;
+}
+.error-text { font-size: 11px; margin-top: 4px; color: var(--danger); }
+
+/* TERMINAL & RESULTS */
+.terminal {
+    margin-top: 16px; background: #020617; border-radius: 10px; border: 1px solid rgba(30,64,175,0.7);
+    padding: 10px; font-family: monospace; font-size: 12px; height: 160px; overflow-y: auto;
+}
+.term-line-time { color: #64748b; }
+.term-line-error { color: var(--danger); }
+.term-line-success { color: var(--success); }
+.term-line-warning { color: var(--warning); }
+
+.result-container {
+    margin-top: 16px; background: #020617; border-radius: 10px; border: 1px solid rgba(34,197,94,0.3);
+    padding: 15px; max-height: 300px; overflow-y: auto; display: none;
+}
+.result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.result-title { font-size: 13px; color: var(--success); display: flex; align-items: center; gap: 8px; }
+.copy-btn {
+    background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8;
+    border-radius: 6px; padding: 6px 12px; font-size: 11px; cursor: pointer; display: flex;
+    align-items: center; gap: 6px;
+}
+.copy-btn.copied { background: rgba(34, 197, 94, 0.15); border-color: rgba(34, 197, 94, 0.4); color: #22c55e; }
+
+.result-json {
+    background: rgba(0, 0, 0, 0.5); border-radius: 8px; padding: 12px;
+    font-family: 'Cascadia Code', 'Courier New', monospace; font-size: 11px; line-height: 1.4;
+    white-space: pre-wrap; word-wrap: break-word; border: 1px solid rgba(148,163,184,0.2); overflow-x: auto;
+}
+.json-key { color: #38bdf8; } .json-string { color: #22c55e; } .json-number { color: #fbbf24; }
+.json-boolean { color: #fb7185; } .json-null { color: #94a3b8; } .json-bracket { color: #c084fc; }
+
+.credit-line {
+    margin-top: 15px; padding-top: 10px; border-top: 1px dashed rgba(148,163,184,0.3);
+    font-size: 11px; color: var(--muted); text-align: center;
+}
+
+/* SCAN OVERLAY */
+.scan-overlay {
+    position:absolute; inset:0; background:rgba(15,23,42,0.96); display:flex; flex-direction:column;
+    align-items:center; justify-content:center; z-index:5; backdrop-filter:blur(4px); border-radius: inherit;
+}
+.scan-overlay.hidden { display:none; }
+.radar {
+    width:120px; height:120px; border-radius:999px; border:1px solid rgba(148,163,184,0.6);
+    background:radial-gradient(circle, rgba(56,189,248,0.2) 0, transparent 60%); position:relative; overflow:hidden;
+}
+.radar::before {
+    content:""; position:absolute; inset:0;
+    background:conic-gradient(from 0deg, rgba(56,189,248,0.8), transparent 40%, transparent 100%);
+    animation: radarSweep 1.1s linear infinite;
+}
+.radar::after { content:""; position:absolute; inset:20%; border-radius:999px; border:1px solid rgba(15,23,42,0.7); }
+@keyframes radarSweep { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
+.scan-text { margin-top:12px; font-size:11px; letter-spacing:0.18em; text-transform:uppercase; color:var(--muted); }
+
+/* METRICS */
+.metrics-row {
+    display:flex; justify-content:space-between; align-items:flex-start; font-size:12px;
+    border-bottom:1px dashed rgba(148,163,184,0.4); padding:6px 0; gap:10px;
+}
+.metrics-label { color:var(--muted); }
+.metrics-value { font-family:monospace; text-align:right; }
+.metrics-sub { display:block; font-size:11px; color:var(--muted); }
+
+/* TABLES */
+.table-wrap { margin-top:10px; max-height:320px; overflow:auto; }
+table { width:100%; border-collapse:collapse; font-size:12px; }
+thead { background:#020617; position:sticky; top:0; z-index:1; }
+th,td { padding:7px 8px; border-bottom:1px solid rgba(30,64,175,0.5); text-align:left; }
+th { color:var(--muted); font-weight:500; }
+tbody tr:hover td { background:rgba(15,23,42,0.9); }
+.link-button { border:none; background:transparent; color:#38bdf8; cursor:pointer; font-size:11px; text-decoration:underline; }
+.empty-text { margin-top:10px; font-size:12px; color:var(--muted); }
+
+/* DISCLAIMER */
+.disclaimer {
+    margin-top: 20px; padding: 15px; background: rgba(251, 113, 133, 0.1); border: 1px solid rgba(251, 113, 133, 0.3);
+    border-radius: 10px; font-size: 11px; color: var(--muted); line-height: 1.5;
+}
+.disclaimer-title { color: var(--warning); font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+
+/* FOOTER */
+.footer {
+    margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(148,163,184,0.2);
+    font-size: 11px; color: var(--muted); text-align: center;
+}
+</style>
+</head>
+<body>
+
+<div id="adminLogin">
+    <div class="login-card" id="loginCard">
+        <div class="login-inner">
+            <div class="login-title">
+                <div class="login-title-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                <div class="login-title-text">Admin Authentication</div>
+            </div>
+            <div class="login-sub">Restricted console · level-3</div>
+
+            <div class="login-field-label">Admin ID</div>
+            <input id="admUser" class="login-input" placeholder="admin">
+            <div class="login-field-label">Password</div>
+            <input id="admPass" type="password" class="login-input" placeholder="••••••••">
+            <div class="login-field-label">4-digit PIN</div>
+            <input id="admPin" class="login-input" maxlength="4" placeholder="4321">
+            <div class="login-field-label">Security Key</div>
+            <input id="admKey" class="login-input" placeholder="REFLEX-ROOT">
+
+            <button class="login-btn" id="loginBtn">
+                <i class="fa-solid fa-right-to-bracket"></i> Grant Access
+            </button>
+            <div id="loginError" class="login-error"></div>
+            <div class="login-meta">
+                <span id="attemptInfo">Attempts left: 5</span>
+                <span>⚡Powered by Null Protocol</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="menu-overlay" id="menuOverlay"></div>
+
+<div class="mobile-header">
+    <button class="mobile-menu-btn" id="mobileMenuBtn">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+    <div class="mobile-logo-text">NULL-PROTOCOL v2.0</div>
+    <div style="width: 20px;"></div> 
+</div>
+
+<div class="app" id="appRoot">
+    <aside class="sidebar" id="sidebar">
+        <button class="close-sidebar-btn" id="closeSidebarBtn">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <div class="logo">
+            <div class="logo-icon"><i class="fa-solid fa-satellite-dish"></i></div>
+            <div>
+                <div class="logo-text-main">NULL-PROTOCOL v2.0</div>
+                <div class="logo-text-sub">Multi-Intel Console</div>
+            </div>
+        </div>
+
+        <div class="menu-item active" data-tab="phoneTab">
+            <i class="fa-solid fa-phone"></i> Phone Lookup
+        </div>
+        <div class="menu-item" data-tab="ifscTab">
+            <i class="fa-solid fa-building-columns"></i> IFSC Lookup
+        </div>
+        <div class="menu-item" data-tab="emailTab">
+            <i class="fa-solid fa-envelope"></i> Email Lookup
+        </div>
+        <div class="menu-item" data-tab="historyTab">
+            <i class="fa-solid fa-clock-rotate-left"></i> History
+        </div>
+
+        <div class="social-links">
+            <a href="https://www.youtube.com/@ArkAadil2." target="_blank" class="social-link">
+                <i class="fab fa-youtube"></i> YouTube
+            </a>
+            <a href="https://instagram.com/number_information" target="_blank" class="social-link">
+                <i class="fab fa-instagram"></i> Instagram
+            </a>
+            <a href="https://t.me/lootdeals" target="_blank" class="social-link">
+                <i class="fab fa-telegram"></i> Telegram
+            </a>
+            <a href="https://t.me/NullProtocol_X" target="_blank" class="social-link">
+                <i class="fa-solid fa-circle-question"></i> Contact
+            </a>
+        </div>
+
+        <div class="sidebar-footer">
+            System ID: <span id="sysId">SYS-0000</span>
+        </div>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <div>
+                <div class="top-title" id="currentTabTitle">Phone Lookup Panel</div>
+                <div class="top-sub" id="currentTabSub">Direct API access with real-time results</div>
+            </div>
+            <div class="status-pill">
+                <span class="status-dot"></span>
+                SYSTEM ONLINE
+            </div>
+        </header>
+
+        <section id="phoneTab" class="tab">
+            <div class="grid-2">
+                <div class="card">
+                    <div class="scan-overlay hidden" id="phoneScanOverlay">
+                        <div class="radar"></div>
+                        <div class="scan-text">scanning phone number...</div>
+                    </div>
+                    <div class="card-inner">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <i class="fa-solid fa-mobile-screen-button"></i>
+                                <span>Phone Number Lookup</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="input-label">ENTER PHONE NUMBER</div>
+                            <input id="phoneInput" class="input-box" placeholder="Ex: 9876543210" maxlength="15">
+                            <div id="phoneInputError" class="error-text" style="display:none;"></div>
+
+                            <button class="action-btn" id="phoneSearchBtn">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                SEARCH PHONE DETAILS
+                            </button>
+
+                            <div id="phoneResult" class="result-container">
+                                <div class="result-header">
+                                    <div class="result-title">
+                                        <i class="fa-solid fa-file-code"></i> <span>JSON</span>
+                                    </div>
+                                    <button class="copy-btn" id="copyPhoneResult">
+                                        <i class="fa-regular fa-copy"></i> Copy
+                                    </button>
+                                </div>
+                                <pre id="phoneResultData" class="result-json">Waiting for data...</pre>
+                                <div class="credit-line">
+                                    Developer: Shahid Ansari | Powered by "NULL PROTOCOL"
+                                </div>
+                            </div>
+
+                            <div id="terminal" class="terminal">
+                                ▶ System initialized...
+                                <br>▶ Select a lookup type and enter data...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <i class="fa-solid fa-network-wired"></i>
+                                <span>Connection Metrics</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="metrics-row"><span class="metrics-label">IP ADDRESS</span><span class="metrics-value" id="userIP">Detecting...</span></div>
+                            <div class="metrics-row"><span class="metrics-label">TIME ZONE</span><span class="metrics-value"><span id="timeZone">Resolving...</span> <span id="timeClock" class="metrics-sub"></span></span></div>
+                            <div class="metrics-row"><span class="metrics-label">BATTERY</span><span class="metrics-value"><span id="batteryMain">Checking...</span> <span id="batteryStatus" class="metrics-sub"></span></span></div>
+                            <div class="metrics-row"><span class="metrics-label">DEVICE MODEL</span><span class="metrics-value" id="deviceModel">Estimating...</span></div>
+                            <div class="metrics-row"><span class="metrics-label">CONNECTION</span><span class="metrics-value" id="connType">Detecting...</span></div>
+                            <div class="metrics-row"><span class="metrics-label">RAM (est.)</span><span class="metrics-value" id="ramInfo">—</span></div>
+                            <div class="metrics-row"><span class="metrics-label">CPU SCORE</span><span class="metrics-value" id="cpuScore">—</span></div>
+                            <div class="metrics-row"><span class="metrics-label">BROWSER FINGERPRINT</span><span class="metrics-value" id="bfScore">—</span></div>
+                            <div class="metrics-row"><span class="metrics-label">SCREEN</span><span class="metrics-value" id="screenMetrics">—</span></div>
+                            <div class="metrics-row"><span class="metrics-label">STORAGE (est.)</span><span class="metrics-value" id="storageInfo">—</span></div>
+                            <div class="empty-text" style="margin-top:10px;">Metrics are computed locally. Lookups open in a secure window to bypass browser restrictions.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="ifscTab" class="tab" style="display:none;">
+            <div class="grid-2">
+                <div class="card">
+                    <div class="scan-overlay hidden" id="ifscScanOverlay">
+                        <div class="radar"></div>
+                        <div class="scan-text">fetching bank details...</div>
+                    </div>
+                    <div class="card-inner">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <i class="fa-solid fa-building-columns"></i>
+                                <span>IFSC Code Lookup</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="input-label">ENTER IFSC CODE</div>
+                            <input id="ifscInput" class="input-box" placeholder="Ex: SBIN0001234" maxlength="11">
+                            <div id="ifscInputError" class="error-text" style="display:none;"></div>
+                            <button class="action-btn" id="ifscSearchBtn"><i class="fa-solid fa-magnifying-glass"></i> SEARCH BANK DETAILS</button>
+                            <div id="ifscResult" class="result-container">
+                                <div class="result-header">
+                                    <div class="result-title"><i class="fa-solid fa-file-code"></i> <span>JSON</span></div>
+                                    <button class="copy-btn" id="copyIfscResult"><i class="fa-regular fa-copy"></i> Copy</button>
+                                </div>
+                                <pre id="ifscResultData" class="result-json">Waiting for data...</pre>
+                                <div class="credit-line">Developer: Shahid Ansari | Powered by "NULL PROTOCOL"</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-header">
+                            <div class="card-title"><i class="fa-solid fa-circle-info"></i> <span>IFSC Information</span></div>
+                        </div>
+                        <div class="card-body">
+                            <div class="empty-text"><strong>What is IFSC?</strong><br>Indian Financial System Code (IFSC) is an 11-character code that identifies bank branches participating in RBI's electronic payment systems.</div>
+                            <div class="empty-text" style="margin-top:10px;"><strong>Format:</strong> XXXX0XXXXXX<br>• First 4 characters: Bank code<br>• Fifth character: 0 (zero)<br>• Last 6 characters: Branch code</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="emailTab" class="tab" style="display:none;">
+            <div class="grid-2">
+                <div class="card">
+                    <div class="scan-overlay hidden" id="emailScanOverlay">
+                        <div class="radar"></div>
+                        <div class="scan-text">analyzing email address...</div>
+                    </div>
+                    <div class="card-inner">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <i class="fa-solid fa-envelope"></i>
+                                <span>Email Address Lookup</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="input-label">ENTER EMAIL ADDRESS</div>
+                            <input id="emailInput" class="input-box" placeholder="Ex: example@gmail.com" type="email">
+                            <div id="emailInputError" class="error-text" style="display:none;"></div>
+                            <button class="action-btn" id="emailSearchBtn"><i class="fa-solid fa-magnifying-glass"></i> SEARCH EMAIL DETAILS</button>
+                            <div id="emailResult" class="result-container">
+                                <div class="result-header">
+                                    <div class="result-title"><i class="fa-solid fa-file-code"></i> <span>JSON</span></div>
+                                    <button class="copy-btn" id="copyEmailResult"><i class="fa-regular fa-copy"></i> Copy</button>
+                                </div>
+                                <pre id="emailResultData" class="result-json">Waiting for data...</pre>
+                                <div class="credit-line">Developer: Shahid Ansari | Powered by "NULL PROTOCOL"</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-header">
+                            <div class="card-title"><i class="fa-solid fa-shield-halved"></i> <span>Privacy Notice</span></div>
+                        </div>
+                        <div class="card-body">
+                            <div class="empty-text"><strong>Ethical Use Only</strong><br>This tool is designed for security research, OSINT investigations, and legitimate verification purposes only.</div>
+                            <div class="empty-text" style="margin-top:10px;"><strong>Data Protection</strong><br>All API calls are made directly from your browser. No data passes through intermediate servers.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="historyTab" class="tab" style="display:none;">
+            <div class="card">
+                <div class="card-inner">
+                    <div class="card-header">
+                        <div class="card-title"><i class="fa-solid fa-clock-rotate-left"></i> <span>Lookup History</span></div>
+                    </div>
+                    <div class="card-body">
+                        <div class="empty-text">Each successful lookup is stored locally and can be reloaded.</div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr><th>#</th><th>Type</th><th>Query</th><th>Timestamp</th><th>Action</th></tr>
+                                </thead>
+                                <tbody id="historyTableBody"></tbody>
+                            </table>
+                        </div>
+                        <div id="historyEmpty" class="empty-text" style="display:none;">No history yet. Start with a lookup.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="disclaimer">
+            <div class="disclaimer-title"><i class="fa-solid fa-triangle-exclamation"></i> IMPORTANT DISCLAIMER</div>
+            This tool is intended for <strong>ethical purposes only</strong>, including:
+            <ul style="margin: 8px 0; padding-left: 20px;">
+                <li>Security research and penetration testing (with proper authorization)</li>
+                <li>Open Source Intelligence (OSINT) gathering for legitimate investigations</li>
+                <li>Educational purposes to understand information security concepts</li>
+                <li>Self-auditing and personal data verification</li>
+            </ul>
+            <strong>WARNING:</strong> Unauthorized access to personal information is illegal. Use this tool only on data you own or have explicit permission to test. The developers assume no responsibility for misuse.
+        </div>
+
+        <div class="footer">
+            <div>NULL PROTOCOL v2.0 | Multi-Intelligence Tool</div>
+            <div style="margin-top: 5px; font-size: 10px; color: #64748b;">For support contact: @NullProtocol_X | All rights reserved</div>
+        </div>
+
+    </main>
+</div>
+
+<script>
+// ===== ADMIN LOGIN CONFIG =====
+const ADMIN_USER  = "Shahid";
+const ADMIN_PASS  = "Tracker@3739";
+const ADMIN_PIN   = "3739";
+const ADMIN_KEY   = "PROTOCOL";
+
+let attemptsLeft = 5;
+
+// Elements
+const adminLoginEl = document.getElementById('adminLogin');
+const appRootEl    = document.getElementById('appRoot');
+const loginCardEl  = document.getElementById('loginCard');
+const loginBtn     = document.getElementById('loginBtn');
+const loginErrorEl = document.getElementById('loginError');
+const attemptInfoEl= document.getElementById('attemptInfo');
+
+const admUserEl = document.getElementById('admUser');
+const admPassEl = document.getElementById('admPass');
+const admPinEl  = document.getElementById('admPin');
+const admKeyEl  = document.getElementById('admKey');
+
+// Mobile Menu Elements
+const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+const sidebar = document.getElementById('sidebar');
+const menuOverlay = document.getElementById('menuOverlay');
+const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+
+// Toggle Mobile Menu
+function toggleMenu() {
+    sidebar.classList.toggle('active');
+    menuOverlay.classList.toggle('active');
+}
+
+if(mobileMenuBtn) {
+    mobileMenuBtn.addEventListener('click', toggleMenu);
+}
+if(closeSidebarBtn) {
+    closeSidebarBtn.addEventListener('click', toggleMenu);
+}
+if(menuOverlay) {
+    menuOverlay.addEventListener('click', toggleMenu);
+}
+
+// Admin login handler
+function handleAdminLogin() {
+    if (attemptsLeft <= 0) return;
+
+    const u = admUserEl.value.trim();
+    const p = admPassEl.value;
+    const pin = admPinEl.value.trim();
+    const key = admKeyEl.value.trim();
+
+    if (!u || !p || !pin || !key) {
+        showLoginError("Fill all fields.");
+        return;
+    }
+
+    if (u === ADMIN_USER && p === ADMIN_PASS && pin === ADMIN_PIN && key === ADMIN_KEY) {
+        loginErrorEl.style.color = "#22C55E";
+        loginErrorEl.textContent = "Access granted. Unlocking console...";
+        loginBtn.disabled = true;
+
+        setTimeout(() => {
+            adminLoginEl.classList.add('hidden');
+            appRootEl.classList.add('visible');
+        }, 600);
+    } else {
+        attemptsLeft--;
+        showLoginError("Invalid credentials. Access denied.");
+        attemptInfoEl.textContent = `Attempts left: ${attemptsLeft}`;
+        loginCardEl.classList.remove('shake');
+        void loginCardEl.offsetWidth;
+        loginCardEl.classList.add('shake');
+
+        if (attemptsLeft <= 0) {
+            loginErrorEl.textContent = "Session locked. Refresh page to retry.";
+            loginBtn.disabled = true;
+        }
+    }
+}
+
+function showLoginError(msg) {
+    loginErrorEl.style.color = "#FB7185";
+    loginErrorEl.textContent = msg;
+}
+
+loginBtn.addEventListener('click', handleAdminLogin);
+[admUserEl, admPassEl, admPinEl, admKeyEl].forEach(input => {
+    input.addEventListener('keydown', (e) => {
+        if (e.key === "Enter") handleAdminLogin();
+    });
+});
+
+// ===== STORAGE KEY =====
+const STORAGE_KEY = 'nullprotocol_v8_history';
+
+// ===== API ENDPOINTS =====
+const APIS = {
+    PHONE: "https://x2-proxy.vercel.app/api?num=",
+    IFSC: "https://ab-ifscinfoapi.vercel.app/info?ifsc=",
+    EMAIL: "https://ab-mailinfoapi.vercel.app/info?mail="
+};
+
+const CORS_PROXY = "https://api.allorigins.win/raw?url=";
+
+// ===== GLOBAL ELEMENTS =====
+const terminal = document.getElementById('terminal');
+const menuItems = document.querySelectorAll('.menu-item');
+const currentTabTitle = document.getElementById('currentTabTitle');
+const currentTabSub = document.getElementById('currentTabSub');
+
+const phoneScanOverlay = document.getElementById('phoneScanOverlay');
+const ifscScanOverlay = document.getElementById('ifscScanOverlay');
+const emailScanOverlay = document.getElementById('emailScanOverlay');
+
+const phoneInput = document.getElementById('phoneInput');
+const phoneInputError = document.getElementById('phoneInputError');
+const phoneSearchBtn = document.getElementById('phoneSearchBtn');
+const phoneResult = document.getElementById('phoneResult');
+const phoneResultData = document.getElementById('phoneResultData');
+const copyPhoneBtn = document.getElementById('copyPhoneResult');
+
+const ifscInput = document.getElementById('ifscInput');
+const ifscInputError = document.getElementById('ifscInputError');
+const ifscSearchBtn = document.getElementById('ifscSearchBtn');
+const ifscResult = document.getElementById('ifscResult');
+const ifscResultData = document.getElementById('ifscResultData');
+const copyIfscBtn = document.getElementById('copyIfscResult');
+
+const emailInput = document.getElementById('emailInput');
+const emailInputError = document.getElementById('emailInputError');
+const emailSearchBtn = document.getElementById('emailSearchBtn');
+const emailResult = document.getElementById('emailResult');
+const emailResultData = document.getElementById('emailResultData');
+const copyEmailBtn = document.getElementById('copyEmailResult');
+
+const historyTableBody = document.getElementById('historyTableBody');
+const historyEmpty = document.getElementById('historyEmpty');
+const sysIdEl = document.getElementById('sysId');
+
+// ===== TAB TITLES CONFIG =====
+const TAB_CONFIG = {
+    phoneTab: { title: "Phone Lookup Panel", sub: "Direct API access with real-time results" },
+    ifscTab: { title: "IFSC Lookup Panel", sub: "Bank branch information lookup" },
+    emailTab: { title: "Email Lookup Panel", sub: "Email verification and analysis" },
+    historyTab: { title: "Lookup History", sub: "Recent search activities" }
+};
+
+// ===== TERMINAL LOG =====
+function addLog(msg, type="info") {
+    const line = document.createElement('div');
+    const timeSpan = document.createElement('span');
+    timeSpan.className = 'term-line-time';
+    timeSpan.textContent = `[${new Date().toLocaleTimeString()}] `;
+    line.appendChild(timeSpan);
+    const msgSpan = document.createElement('span');
+    if (type === "error") msgSpan.className = 'term-line-error';
+    else if (type === "success") msgSpan.className = 'term-line-success';
+    else if (type === "warning") msgSpan.className = 'term-line-warning';
+    msgSpan.textContent = msg;
+    line.appendChild(msgSpan);
+    terminal.appendChild(line);
+    terminal.scrollTop = terminal.scrollHeight;
+}
+
+// ===== VALIDATION FUNCTIONS =====
+function validatePhone(num) {
+    const t = (num||'').trim().replace(/\D/g, '');
+    if (!t) return "Phone number is required.";
+    if (!/^\d+$/.test(t)) return "Only digits (0–9) allowed.";
+    if (t.length < 10) return "Enter a valid mobile number (10+ digits).";
+    return "";
+}
+
+function validateIFSC(code) {
+    const t = (code||'').trim().toUpperCase();
+    if (!t) return "IFSC code is required.";
+    if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(t)) return "Invalid IFSC format (XXXX0XXXXXX).";
+    return "";
+}
+
+function validateEmail(email) {
+    const t = (email||'').trim();
+    if (!t) return "Email address is required.";
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(t)) return "Invalid email format.";
+    return "";
+}
+
+// ===== HISTORY STORAGE =====
+function loadHistory() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : [];
+    } catch { return []; }
+}
+function saveHistory(entries) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(entries)); } catch(e) {}
+}
+let historyEntries = loadHistory();
+
+function formatTime(iso) {
+    const d = new Date(iso);
+    if (isNaN(d)) return "—";
+    return d.toLocaleString();
+}
+
+// ===== RENDER TABLES =====
+function renderHistoryTable() {
+    historyTableBody.innerHTML = "";
+    if (!historyEntries.length) { historyEmpty.style.display = "block"; return; }
+    historyEmpty.style.display = "none";
+    historyEntries.forEach((e, i) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${i + 1}</td><td><span style="background:#1e293b;padding:2px 6px;border-radius:4px;font-size:10px;">${e.type || 'Phone'}</span></td><td>${e.query}</td><td>${formatTime(e.time)}</td><td><button class="link-button" data-index="${i}" data-action="reload">Reload</button></td>`;
+        historyTableBody.appendChild(tr);
+    });
+}
+
+function addHistoryEntry(type, query, result = null) {
+    const entry = {
+        type: type,
+        query: String(query),
+        time: new Date().toISOString(),
+        result: result ? JSON.stringify(result).substring(0, 500) : null
+    };
+    historyEntries.unshift(entry);
+    historyEntries = historyEntries.slice(0, 100);
+    saveHistory(historyEntries);
+    renderHistoryTable();
+}
+
+// ===== JSON HIGHLIGHT =====
+function syntaxHighlight(json) {
+    if (typeof json !== 'string') { json = JSON.stringify(json, null, 2); }
+    json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)/g, function (match) {
+        let cls = 'json-number';
+        if (/^"/.test(match)) {
+            if (/:$/.test(match)) { cls = 'json-key'; match = match.replace(/:$/, '') + '<span class="json-bracket">:</span>'; } else { cls = 'json-string'; }
+        } else if (/true|false/.test(match)) { cls = 'json-boolean'; } else if (/null/.test(match)) { cls = 'json-null'; }
+        return '<span class="' + cls + '">' + match + '</span>';
+    });
+}
+
+// ===== COPY FUNCTION (UNIVERSAL - MOBILE FIXED) =====
+function setupCopyButton(button, jsonData) {
+    button.onclick = async () => {
+        const originalContent = '<i class="fa-regular fa-copy"></i> Copy';
+        let success = false;
+
+        try {
+            // Priority 1: Modern Clipboard API (Sirf HTTPS/Localhost par chalta hai)
+            if (navigator.clipboard && navigator.clipboard.writeText && window.isSecureContext) {
+                await navigator.clipboard.writeText(jsonData);
+                success = true;
+            } else {
+                throw new Error("Secure Context Unavailable");
+            }
+        } catch (err) {
+            // Priority 2: Fallback Method (Mobile & HTTP ke liye)
+            try {
+                const textArea = document.createElement("textarea");
+                textArea.value = jsonData;
+                
+                // Mobile ke liye Styling
+                textArea.style.position = "fixed";
+                textArea.style.left = "0";
+                textArea.style.top = "0";
+                textArea.style.width = "2em";
+                textArea.style.height = "2em";
+                textArea.style.padding = "0";
+                textArea.style.border = "none";
+                textArea.style.outline = "none";
+                textArea.style.boxShadow = "none";
+                textArea.style.background = "transparent";
+                textArea.setAttribute("readonly", "");
+
+                document.body.appendChild(textArea);
+                
+                // Mobile Selection Logic
+                textArea.focus();
+                textArea.select();
+                textArea.setSelectionRange(0, 999999); // iOS fix
+
+                success = document.execCommand('copy');
+                document.body.removeChild(textArea);
+            } catch (fallbackErr) {
+                console.error("Fallback copy failed:", fallbackErr);
+                success = false;
+            }
+        }
+
+        // Animation & Feedback
+        if (success) {
+            button.classList.add('copied');
+            button.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+            addLog("JSON copied to clipboard", "success");
+            
+            setTimeout(() => { 
+                button.classList.remove('copied'); 
+                button.innerHTML = originalContent; 
+            }, 2000);
+        } else {
+            addLog("Copy failed. Try manually.", "error");
+            button.innerHTML = '<i class="fa-solid fa-xmark"></i> Error';
+            setTimeout(() => { button.innerHTML = originalContent; }, 2000);
+        }
+    };
+}
+
+// ===== API RESPONSE MODIFIER =====
+function modifyApiResponse(data) {
+    if (typeof data === 'object' && data !== null && !Array.isArray(data)) {
+        delete data.credit_by; delete data._credit;
+        data["---------------------------------"] = "---------------------------------";
+        data["developer"] = "Shahid Ansari";
+        data["powered_by"] = "NULL PROTOCOL";
+    }
+    return data;
+}
+
+// ===== API CALLER =====
+async function callAPI(apiUrl, type, query) {
+    try {
+        addLog(`Calling ${type} API for: ${query}`, "info");
+        let response; let url = apiUrl + encodeURIComponent(query);
+        try {
+            response = await fetch(url, { method: 'GET', headers: { 'Accept': 'application/json', 'User-Agent': 'Mozilla/5.0' } });
+        } catch (fetchError) {
+            addLog("Direct fetch failed, trying CORS proxy...", "warning");
+            response = await fetch(CORS_PROXY + encodeURIComponent(url), { method: 'GET', headers: { 'Accept': 'application/json' } });
+        }
+        if (!response.ok) throw new Error(`API Error: ${response.status} ${response.statusText}`);
+        let data; const responseText = await response.text();
+        try { data = JSON.parse(responseText); } catch (parseError) { data = { response: responseText, status: "success", format: "text", note: "API returned non-JSON format" }; }
+        data = modifyApiResponse(data);
+        addLog(`${type} lookup successful!`, "success");
+        return { success: true, data: data };
+    } catch (error) {
+        addLog(`${type} API failed: ${error.message}`, "error");
+        return { success: false, error: error.message, data: { error: "API request failed", message: error.message, note: "Check console for details", "---------------------------------" : "---------------------------------", developer: "Shahid Ansari", powered_by: "NULL PROTOCOL" } };
+    }
+}
+
+// ===== DISPLAY =====
+function displayResult(resultElement, dataElement, data, copyButton) {
+    try {
+        let formattedJSON = (typeof data === 'object') ? JSON.stringify(data, null, 2) : String(data);
+        dataElement.innerHTML = syntaxHighlight(formattedJSON);
+        resultElement.style.display = 'block';
+        if (copyButton) setupCopyButton(copyButton, formattedJSON);
+        setTimeout(() => { resultElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 100);
+    } catch (error) {
+        dataElement.textContent = `Error: ${error.message}`; resultElement.style.display = 'block';
+    }
+}
+
+// ===== EXECUTE LOOKUPS =====
+async function executePhoneLookup() {
+    const num = phoneInput.value.trim();
+    phoneInputError.style.display = "none";
+    if (validatePhone(num)) { phoneInputError.textContent = validatePhone(num); phoneInputError.style.display = "block"; return; }
+    phoneScanOverlay.classList.remove('hidden'); phoneSearchBtn.disabled = true; phoneResult.style.display = 'none';
+    try { const result = await callAPI(APIS.PHONE, "Phone", num); displayResult(phoneResult, phoneResultData, result.data, copyPhoneBtn); if(result.success) addHistoryEntry("Phone", num, result.data); }
+    catch (e) { displayResult(phoneResult, phoneResultData, {error: e.message}, copyPhoneBtn); }
+    finally { phoneScanOverlay.classList.add('hidden'); phoneSearchBtn.disabled = false; }
+}
+
+async function executeIFSCLookup() {
+    const code = ifscInput.value.trim().toUpperCase();
+    ifscInputError.style.display = "none";
+    if (validateIFSC(code)) { ifscInputError.textContent = validateIFSC(code); ifscInputError.style.display = "block"; return; }
+    ifscScanOverlay.classList.remove('hidden'); ifscSearchBtn.disabled = true; ifscResult.style.display = 'none';
+    try { const result = await callAPI(APIS.IFSC, "IFSC", code); displayResult(ifscResult, ifscResultData, result.data, copyIfscBtn); if(result.success) addHistoryEntry("IFSC", code, result.data); }
+    catch (e) { displayResult(ifscResult, ifscResultData, {error: e.message}, copyIfscBtn); }
+    finally { ifscScanOverlay.classList.add('hidden'); ifscSearchBtn.disabled = false; }
+}
+
+async function executeEmailLookup() {
+    const email = emailInput.value.trim();
+    emailInputError.style.display = "none";
+    if (validateEmail(email)) { emailInputError.textContent = validateEmail(email); emailInputError.style.display = "block"; return; }
+    emailScanOverlay.classList.remove('hidden'); emailSearchBtn.disabled = true; emailResult.style.display = 'none';
+    try { const result = await callAPI(APIS.EMAIL, "Email", email); displayResult(emailResult, emailResultData, result.data, copyEmailBtn); if(result.success) addHistoryEntry("Email", email, result.data); }
+    catch (e) { displayResult(emailResult, emailResultData, {error: e.message}, copyEmailBtn); }
+    finally { emailScanOverlay.classList.add('hidden'); emailSearchBtn.disabled = false; }
+}
+
+// ===== LISTENERS =====
+phoneSearchBtn.addEventListener('click', executePhoneLookup);
+phoneInput.addEventListener('keydown', (e) => { if (e.key === "Enter") executePhoneLookup(); });
+ifscSearchBtn.addEventListener('click', executeIFSCLookup);
+ifscInput.addEventListener('keydown', (e) => { if (e.key === "Enter") executeIFSCLookup(); });
+emailSearchBtn.addEventListener('click', executeEmailLookup);
+emailInput.addEventListener('keydown', (e) => { if (e.key === "Enter") executeEmailLookup(); });
+
+// ===== NAVIGATION =====
+menuItems.forEach(item => {
+    item.addEventListener('click', () => {
+        const tabId = item.getAttribute('data-tab');
+        menuItems.forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+        document.querySelectorAll('.tab').forEach(sec => { sec.style.display = (sec.id === tabId) ? 'block' : 'none'; });
+        if (TAB_CONFIG[tabId]) { currentTabTitle.textContent = TAB_CONFIG[tabId].title; currentTabSub.textContent = TAB_CONFIG[tabId].sub; }
+        
+        // Auto-close sidebar on mobile when clicked
+        if (window.innerWidth <= 900) toggleMenu();
+    });
+});
+
+// ===== HISTORY BUTTONS =====
+historyTableBody.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-action="reload"]');
+    if (!btn) return;
+    const idx = parseInt(btn.getAttribute('data-index'), 10);
+    const entry = historyEntries[idx];
+    if (entry) {
+        let targetTab = 'phoneTab';
+        if (entry.type === 'IFSC') targetTab = 'ifscTab';
+        if (entry.type === 'Email') targetTab = 'emailTab';
+        const targetMenu = document.querySelector(`.menu-item[data-tab="${targetTab}"]`);
+        if (targetMenu) {
+            targetMenu.click();
+            if (targetTab === 'phoneTab') phoneInput.value = entry.query;
+            if (targetTab === 'ifscTab') ifscInput.value = entry.query;
+            if (targetTab === 'emailTab') emailInput.value = entry.query;
+            addLog(`Reloaded: ${entry.query}`, "success");
+        }
+    }
+});
+
+// ===== SYSTEM METRICS =====
+if (sysIdEl) sysIdEl.textContent = "SYS-" + Math.floor(Math.random() * 9000 + 1000);
+async function getRealIP() {
+    const sources = ["https://api.ipify.org?format=json", "https://ipinfo.io/json", "https://api64.ipify.org?format=json"];
+    for (let url of sources) { try { const res = await fetch(url); if (!res.ok) continue; const data = await res.json(); const ip = data.ip || data.query || data.client_ip; if (ip) { document.getElementById('userIP').textContent = ip; return; } } catch(e) {} }
+    document.getElementById('userIP').textContent = "Unavailable";
+}
+try { document.getElementById('timeZone').textContent = Intl.DateTimeFormat().resolvedOptions().timeZone || "Unknown"; } catch {}
+function updateClock() { const el = document.getElementById('timeClock'); if(el) el.textContent = new Date().toLocaleTimeString(); }
+updateClock(); setInterval(updateClock, 1000);
+
+if ('getBattery' in navigator) {
+    navigator.getBattery().then(battery => {
+        function updateBattery() {
+            document.getElementById('batteryMain').textContent = `${Math.round(battery.level * 100)}%`;
+            document.getElementById('batteryStatus').textContent = `Status: ${battery.level >= 0.4 ? (battery.level >= 0.8 ? "Good" : "Moderate") : "Low"}${battery.charging ? " (Charging)" : ""}`;
+        }
+        updateBattery(); battery.addEventListener('levelchange', updateBattery); battery.addEventListener('chargingchange', updateBattery);
+    }).catch(() => { document.getElementById('batteryMain').textContent = "Not accessible"; });
+} else { document.getElementById('batteryMain').textContent = "Not supported"; }
+
+function estimateDeviceModel(){
+    const ua = navigator.userAgent || "";
+    if (/iPhone/.test(ua)) return "Apple iPhone";
+    if (/iPad/.test(ua)) return "Apple iPad";
+    if (/Android/.test(ua)) { const m = ua.match(/Android.+; (.+?) Build/); return m ? `${m[1].trim()}` : "Android Device"; }
+    if (/Windows/.test(ua)) return "Windows Device";
+    return "Unknown Device";
+}
+document.getElementById('deviceModel').textContent = estimateDeviceModel();
+function detectConnection(){ try{ const n = navigator; if (n.connection && n.connection.effectiveType) return n.connection.effectiveType === '4g' ? '4G / Good' : n.connection.effectiveType.toUpperCase(); return navigator.onLine ? 'Online' : 'Offline'; } catch(e){ return 'Unknown'; } }
+document.getElementById('connType').textContent = detectConnection();
+const ramEl = document.getElementById('ramInfo'); if (ramEl) { if ('deviceMemory' in navigator) { ramEl.textContent = `${navigator.deviceMemory} GB (approx)`; } else { ramEl.textContent = (navigator.hardwareConcurrency || 2) > 4 ? "8+ GB (approx)" : "4 - 8 GB (approx)"; } }
+function cpuBenchmarkSample(iter = 100000) { const start = performance.now(); let x = 0; for (let i = 0; i < iter; i++) x += Math.sin(i); const score = Math.max(1, Math.round(10000 / ((performance.now() - start) + 1))); return { score }; }
+try { document.getElementById('cpuScore').textContent = `${cpuBenchmarkSample().score} (perf)`; } catch (e) { document.getElementById('cpuScore').textContent = "N/A"; }
+function fingerprintScore() { let s = 0; try { if (navigator.doNotTrack) s+=5; if (navigator.language) s+=5; if (navigator.userAgent) s+=5; s += (navigator.hardwareConcurrency || 2); s = Math.min(100, Math.round(s * 6)); } catch (e) { s=10; } return s; }
+document.getElementById('bfScore').textContent = `${fingerprintScore()}%`;
+const screenEl = document.getElementById('screenMetrics'); if (screenEl) { const s = window.screen; screenEl.textContent = `${s.width} x ${s.height} px, ${window.devicePixelRatio} DPR`; }
+const storageEl = document.getElementById('storageInfo'); if (storageEl) { if (navigator.storage && navigator.storage.estimate) { navigator.storage.estimate().then(est => { storageEl.textContent = `${(est.usage/1e9).toFixed(2)} GB used / ${(est.quota/1e9).toFixed(2)} GB (est)`; }).catch(() => { storageEl.textContent = "N/A"; }); } else { storageEl.textContent = "Not supported"; } }
+
+// Init
+getRealIP(); renderHistoryTable();
+addLog("System initialized.", "success");
+</script>
+</body>
+</html>
