@@ -1,8 +1,9 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>NUM-TRACKER v10.0 | MOBILE OPTIMIZED</title>
+<title>NUM-TRACKER v2.0</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
@@ -337,8 +338,13 @@ body::after {
     font-family: 'Cascadia Code', 'Courier New', monospace; font-size: 11px; line-height: 1.4;
     white-space: pre-wrap; word-wrap: break-word; border: 1px solid rgba(148,163,184,0.2); overflow-x: auto;
 }
-.json-key { color: #38bdf8; } .json-string { color: #22c55e; } .json-number { color: #fbbf24; }
-.json-boolean { color: #fb7185; } .json-null { color: #94a3b8; } .json-bracket { color: #c084fc; }
+/* ONLY 3 COLORS FOR JSON OUTPUT */
+.json-key { color: #38bdf8; } /* BLUE - Keys */
+.json-string { color: #22c55e; } /* DARK GREEN - Strings */
+.json-number { color: #fbbf24; } /* YELLOW - Numbers */
+.json-boolean { color: #22c55e; } /* DARK GREEN - Booleans */
+.json-null { color: #94a3b8; } /* Gray for null */
+.json-bracket { color: #c084fc; } /* Purple for brackets */
 
 .credit-line {
     margin-top: 15px; padding-top: 10px; border-top: 1px dashed rgba(148,163,184,0.3);
@@ -462,6 +468,16 @@ tbody tr:hover td { background:rgba(15,23,42,0.9); }
         <div class="menu-item" data-tab="emailTab">
             <i class="fa-solid fa-envelope"></i> Email Lookup
         </div>
+        <!-- NEW MENU ITEMS ADDED -->
+        <div class="menu-item" data-tab="vehicleTab">
+            <i class="fa-solid fa-car"></i> Vehicle Lookup
+        </div>
+        <div class="menu-item" data-tab="pincodeTab">
+            <i class="fa-solid fa-map-marker-alt"></i> Pincode Lookup
+        </div>
+        <div class="menu-item" data-tab="gstTab">
+            <i class="fa-solid fa-file-invoice-dollar"></i> GST Lookup
+        </div>
         <div class="menu-item" data-tab="historyTab">
             <i class="fa-solid fa-clock-rotate-left"></i> History
         </div>
@@ -470,10 +486,10 @@ tbody tr:hover td { background:rgba(15,23,42,0.9); }
             <a href="https://www.youtube.com/@ArkAadil2." target="_blank" class="social-link">
                 <i class="fab fa-youtube"></i> YouTube
             </a>
-            <a href="https://instagram.com/number_information" target="_blank" class="social-link">
+            <a href="https://instagram.com/osint_lookup" target="_blank" class="social-link">
                 <i class="fab fa-instagram"></i> Instagram
             </a>
-            <a href="https://t.me/lootdeals" target="_blank" class="social-link">
+            <a href="https://t.me/osint_lookup" target="_blank" class="social-link">
                 <i class="fab fa-telegram"></i> Telegram
             </a>
             <a href="https://t.me/NullProtocol_X" target="_blank" class="social-link">
@@ -659,6 +675,141 @@ tbody tr:hover td { background:rgba(15,23,42,0.9); }
             </div>
         </section>
 
+        <!-- NEW VEHICLE TAB ADDED -->
+        <section id="vehicleTab" class="tab" style="display:none;">
+            <div class="grid-2">
+                <div class="card">
+                    <div class="scan-overlay hidden" id="vehicleScanOverlay">
+                        <div class="radar"></div>
+                        <div class="scan-text">scanning vehicle details...</div>
+                    </div>
+                    <div class="card-inner">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <i class="fa-solid fa-car"></i>
+                                <span>Vehicle RC Lookup</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="input-label">ENTER VEHICLE REGISTRATION NUMBER</div>
+                            <input id="vehicleInput" class="input-box" placeholder="Ex: MH12AB1234" maxlength="20">
+                            <div id="vehicleInputError" class="error-text" style="display:none;"></div>
+                            <button class="action-btn" id="vehicleSearchBtn"><i class="fa-solid fa-magnifying-glass"></i> SEARCH VEHICLE DETAILS</button>
+                            <div id="vehicleResult" class="result-container">
+                                <div class="result-header">
+                                    <div class="result-title"><i class="fa-solid fa-file-code"></i> <span>JSON</span></div>
+                                    <button class="copy-btn" id="copyVehicleResult"><i class="fa-regular fa-copy"></i> Copy</button>
+                                </div>
+                                <pre id="vehicleResultData" class="result-json">Waiting for data...</pre>
+                                <div class="credit-line">Developer: Shahid Ansari | Powered by "NULL PROTOCOL"</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-header">
+                            <div class="card-title"><i class="fa-solid fa-circle-info"></i> <span>Vehicle Lookup Info</span></div>
+                        </div>
+                        <div class="card-body">
+                            <div class="empty-text"><strong>What is Vehicle RC?</strong><br>Vehicle Registration Certificate (RC) contains details like owner name, vehicle model, registration date, insurance status and more.</div>
+                            <div class="empty-text" style="margin-top:10px;"><strong>Supported Formats:</strong><br>• MH12AB1234 (Maharashtra)<br>• DL4CAB1234 (Delhi)<br>• KA01AB1234 (Karnataka)<br>• All Indian states RTO codes</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- NEW PINCODE TAB ADDED -->
+        <section id="pincodeTab" class="tab" style="display:none;">
+            <div class="grid-2">
+                <div class="card">
+                    <div class="scan-overlay hidden" id="pincodeScanOverlay">
+                        <div class="radar"></div>
+                        <div class="scan-text">fetching pincode details...</div>
+                    </div>
+                    <div class="card-inner">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <i class="fa-solid fa-map-marker-alt"></i>
+                                <span>Pincode Lookup</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="input-label">ENTER 6-DIGIT PINCODE</div>
+                            <input id="pincodeInput" class="input-box" placeholder="Ex: 400001" maxlength="6" type="number">
+                            <div id="pincodeInputError" class="error-text" style="display:none;"></div>
+                            <button class="action-btn" id="pincodeSearchBtn"><i class="fa-solid fa-magnifying-glass"></i> SEARCH PINCODE DETAILS</button>
+                            <div id="pincodeResult" class="result-container">
+                                <div class="result-header">
+                                    <div class="result-title"><i class="fa-solid fa-file-code"></i> <span>JSON</span></div>
+                                    <button class="copy-btn" id="copyPincodeResult"><i class="fa-regular fa-copy"></i> Copy</button>
+                                </div>
+                                <pre id="pincodeResultData" class="result-json">Waiting for data...</pre>
+                                <div class="credit-line">Developer: Shahid Ansari | Powered by "NULL PROTOCOL"</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-header">
+                            <div class="card-title"><i class="fa-solid fa-circle-info"></i> <span>Pincode Information</span></div>
+                        </div>
+                        <div class="card-body">
+                            <div class="empty-text"><strong>What is Pincode?</strong><br>Postal Index Number (PIN) is a 6-digit code used by India Post for efficient mail delivery. Each pincode corresponds to a specific geographic region.</div>
+                            <div class="empty-text" style="margin-top:10px;"><strong>First Digit Meaning:</strong><br>• 1: Delhi, Haryana, Punjab<br>• 2: Uttar Pradesh, Uttarakhand<br>• 3: Rajasthan, Gujarat<br>• 4: Maharashtra, Goa<br>• 5: Andhra, Telangana<br>• 6: Karnataka, Kerala</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- NEW GST TAB ADDED -->
+        <section id="gstTab" class="tab" style="display:none;">
+            <div class="grid-2">
+                <div class="card">
+                    <div class="scan-overlay hidden" id="gstScanOverlay">
+                        <div class="radar"></div>
+                        <div class="scan-text">fetching GST details...</div>
+                    </div>
+                    <div class="card-inner">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <i class="fa-solid fa-file-invoice-dollar"></i>
+                                <span>GST Number Lookup</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="input-label">ENTER GST NUMBER</div>
+                            <input id="gstInput" class="input-box" placeholder="Ex: 27AAAAA0000A1Z5" maxlength="15">
+                            <div id="gstInputError" class="error-text" style="display:none;"></div>
+                            <button class="action-btn" id="gstSearchBtn"><i class="fa-solid fa-magnifying-glass"></i> SEARCH GST DETAILS</button>
+                            <div id="gstResult" class="result-container">
+                                <div class="result-header">
+                                    <div class="result-title"><i class="fa-solid fa-file-code"></i> <span>JSON</span></div>
+                                    <button class="copy-btn" id="copyGstResult"><i class="fa-regular fa-copy"></i> Copy</button>
+                                </div>
+                                <pre id="gstResultData" class="result-json">Waiting for data...</pre>
+                                <div class="credit-line">Developer: Shahid Ansari | Powered by "NULL PROTOCOL"</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-header">
+                            <div class="card-title"><i class="fa-solid fa-circle-info"></i> <span>GST Information</span></div>
+                        </div>
+                        <div class="card-body">
+                            <div class="empty-text"><strong>What is GST?</strong><br>Goods and Services Tax (GST) is a 15-digit identification number assigned to businesses registered under GST. It contains state code, PAN number, entity code and checksum digit.</div>
+                            <div class="empty-text" style="margin-top:10px;"><strong>Format:</strong> 27AAAAA0000A1Z5<br>• First 2 digits: State code<br>• Next 10 digits: PAN number<br>• 13th digit: Entity number<br>• 14th digit: 'Z' by default<br>• 15th digit: Checksum digit</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <section id="historyTab" class="tab" style="display:none;">
             <div class="card">
                 <div class="card-inner">
@@ -694,7 +845,7 @@ tbody tr:hover td { background:rgba(15,23,42,0.9); }
         </div>
 
         <div class="footer">
-            <div>NULL PROTOCOL v2.0 | Multi-Intelligence Tool</div>
+            <div>NULL PROTOCOL v2.0 | Multi-Intelligence Tool </div>
             <div style="margin-top: 5px; font-size: 10px; color: #64748b;">For support contact: @NullProtocol_X | All rights reserved</div>
         </div>
 
@@ -802,7 +953,11 @@ const STORAGE_KEY = 'nullprotocol_v8_history';
 const APIS = {
     PHONE: "https://x2-proxy.vercel.app/api?num=",
     IFSC: "https://ab-ifscinfoapi.vercel.app/info?ifsc=",
-    EMAIL: "https://ab-mailinfoapi.vercel.app/info?mail="
+    EMAIL: "https://abbas-apis.vercel.app/api/email?mail=",
+    // NEW APIs ADDED
+    VEHICLE: "https://veerulookup.onrender.com/search_vehicle?rc=",
+    PINCODE: "https://api.postalpincode.in/pincode/",
+    GST: "https://veerulookup.onrender.com/search_gst?gst="
 };
 
 const CORS_PROXY = "https://api.allorigins.win/raw?url=";
@@ -816,6 +971,10 @@ const currentTabSub = document.getElementById('currentTabSub');
 const phoneScanOverlay = document.getElementById('phoneScanOverlay');
 const ifscScanOverlay = document.getElementById('ifscScanOverlay');
 const emailScanOverlay = document.getElementById('emailScanOverlay');
+// NEW SCAN OVERLAYS
+const vehicleScanOverlay = document.getElementById('vehicleScanOverlay');
+const pincodeScanOverlay = document.getElementById('pincodeScanOverlay');
+const gstScanOverlay = document.getElementById('gstScanOverlay');
 
 const phoneInput = document.getElementById('phoneInput');
 const phoneInputError = document.getElementById('phoneInputError');
@@ -838,6 +997,28 @@ const emailResult = document.getElementById('emailResult');
 const emailResultData = document.getElementById('emailResultData');
 const copyEmailBtn = document.getElementById('copyEmailResult');
 
+// NEW ELEMENTS
+const vehicleInput = document.getElementById('vehicleInput');
+const vehicleInputError = document.getElementById('vehicleInputError');
+const vehicleSearchBtn = document.getElementById('vehicleSearchBtn');
+const vehicleResult = document.getElementById('vehicleResult');
+const vehicleResultData = document.getElementById('vehicleResultData');
+const copyVehicleBtn = document.getElementById('copyVehicleResult');
+
+const pincodeInput = document.getElementById('pincodeInput');
+const pincodeInputError = document.getElementById('pincodeInputError');
+const pincodeSearchBtn = document.getElementById('pincodeSearchBtn');
+const pincodeResult = document.getElementById('pincodeResult');
+const pincodeResultData = document.getElementById('pincodeResultData');
+const copyPincodeBtn = document.getElementById('copyPincodeResult');
+
+const gstInput = document.getElementById('gstInput');
+const gstInputError = document.getElementById('gstInputError');
+const gstSearchBtn = document.getElementById('gstSearchBtn');
+const gstResult = document.getElementById('gstResult');
+const gstResultData = document.getElementById('gstResultData');
+const copyGstBtn = document.getElementById('copyGstResult');
+
 const historyTableBody = document.getElementById('historyTableBody');
 const historyEmpty = document.getElementById('historyEmpty');
 const sysIdEl = document.getElementById('sysId');
@@ -847,6 +1028,9 @@ const TAB_CONFIG = {
     phoneTab: { title: "Phone Lookup Panel", sub: "Direct API access with real-time results" },
     ifscTab: { title: "IFSC Lookup Panel", sub: "Bank branch information lookup" },
     emailTab: { title: "Email Lookup Panel", sub: "Email verification and analysis" },
+    vehicleTab: { title: "Vehicle Lookup Panel", sub: "Vehicle registration details lookup" },
+    pincodeTab: { title: "Pincode Lookup Panel", sub: "Indian postal code information" },
+    gstTab: { title: "GST Lookup Panel", sub: "GST number verification and details" },
     historyTab: { title: "Lookup History", sub: "Recent search activities" }
 };
 
@@ -888,6 +1072,31 @@ function validateEmail(email) {
     if (!t) return "Email address is required.";
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(t)) return "Invalid email format.";
+    return "";
+}
+
+// NEW VALIDATION FUNCTIONS
+function validateVehicle(rc) {
+    const t = (rc||'').trim().toUpperCase();
+    if (!t) return "Vehicle registration number is required.";
+    if (t.length < 5) return "Enter a valid vehicle number.";
+    // Basic Indian vehicle number pattern
+    if (!/^[A-Z]{2}[0-9]{1,2}[A-Z]{1,2}[0-9]{1,4}$/.test(t)) return "Invalid vehicle number format.";
+    return "";
+}
+
+function validatePincode(pincode) {
+    const t = (pincode||'').trim();
+    if (!t) return "Pincode is required.";
+    if (!/^\d{6}$/.test(t)) return "Enter a valid 6-digit pincode.";
+    return "";
+}
+
+function validateGST(gst) {
+    const t = (gst||'').trim().toUpperCase();
+    if (!t) return "GST number is required.";
+    if (t.length !== 15) return "GST number must be 15 characters.";
+    if (!/^\d{2}[A-Z]{5}\d{4}[A-Z]{1}[A-Z\d]{1}[Z]{1}[A-Z\d]{1}$/.test(t)) return "Invalid GST format.";
     return "";
 }
 
@@ -934,27 +1143,68 @@ function addHistoryEntry(type, query, result = null) {
     renderHistoryTable();
 }
 
-// ===== JSON HIGHLIGHT =====
+// ===== SIMPLE JSON HIGHLIGHT (ONLY 3 COLORS) =====
 function syntaxHighlight(json) {
-    if (typeof json !== 'string') { json = JSON.stringify(json, null, 2); }
+    if (typeof json !== 'string') { 
+        json = JSON.stringify(json, null, 2); 
+    }
+    
+    let parsed;
+    try {
+        parsed = JSON.parse(json);
+    } catch {
+        // If not valid JSON, return as is with basic highlighting
+        json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)/g, function (match) {
+            let cls = 'json-number';
+            if (/^"/.test(match)) {
+                if (/:$/.test(match)) { 
+                    cls = 'json-key'; 
+                    match = match.replace(/:$/, '') + '<span class="json-bracket">:</span>'; 
+                } else { 
+                    cls = 'json-string'; 
+                }
+            } else if (/true|false/.test(match)) { cls = 'json-boolean'; } 
+            else if (/null/.test(match)) { cls = 'json-null'; }
+            return '<span class="' + cls + '">' + match + '</span>';
+        });
+    }
+    
+    // Add developer info to the JSON object
+    if (typeof parsed === 'object' && parsed !== null) {
+        parsed["---------------------------------"] = "---------------------------------";
+        parsed["developer"] = "Shahid Ansari";
+        parsed["powered_by"] = "NULL PROTOCOL";
+        
+        // Convert back to string for highlighting
+        json = JSON.stringify(parsed, null, 2);
+    }
+    
     json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    
+    // SIMPLE 3-COLOR HIGHLIGHTING (JUST LIKE BEFORE)
     return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)/g, function (match) {
         let cls = 'json-number';
         if (/^"/.test(match)) {
-            if (/:$/.test(match)) { cls = 'json-key'; match = match.replace(/:$/, '') + '<span class="json-bracket">:</span>'; } else { cls = 'json-string'; }
-        } else if (/true|false/.test(match)) { cls = 'json-boolean'; } else if (/null/.test(match)) { cls = 'json-null'; }
+            if (/:$/.test(match)) { 
+                cls = 'json-key'; 
+                match = match.replace(/:$/, '') + '<span class="json-bracket">:</span>'; 
+            } else { 
+                cls = 'json-string'; 
+            }
+        } else if (/true|false/.test(match)) { cls = 'json-boolean'; } 
+        else if (/null/.test(match)) { cls = 'json-null'; }
         return '<span class="' + cls + '">' + match + '</span>';
     });
 }
 
-// ===== COPY FUNCTION (UNIVERSAL - MOBILE FIXED) =====
+// ===== COPY FUNCTION =====
 function setupCopyButton(button, jsonData) {
     button.onclick = async () => {
         const originalContent = '<i class="fa-regular fa-copy"></i> Copy';
         let success = false;
 
         try {
-            // Priority 1: Modern Clipboard API (Sirf HTTPS/Localhost par chalta hai)
             if (navigator.clipboard && navigator.clipboard.writeText && window.isSecureContext) {
                 await navigator.clipboard.writeText(jsonData);
                 success = true;
@@ -962,12 +1212,10 @@ function setupCopyButton(button, jsonData) {
                 throw new Error("Secure Context Unavailable");
             }
         } catch (err) {
-            // Priority 2: Fallback Method (Mobile & HTTP ke liye)
             try {
                 const textArea = document.createElement("textarea");
                 textArea.value = jsonData;
                 
-                // Mobile ke liye Styling
                 textArea.style.position = "fixed";
                 textArea.style.left = "0";
                 textArea.style.top = "0";
@@ -982,10 +1230,9 @@ function setupCopyButton(button, jsonData) {
 
                 document.body.appendChild(textArea);
                 
-                // Mobile Selection Logic
                 textArea.focus();
                 textArea.select();
-                textArea.setSelectionRange(0, 999999); // iOS fix
+                textArea.setSelectionRange(0, 999999);
 
                 success = document.execCommand('copy');
                 document.body.removeChild(textArea);
@@ -995,7 +1242,6 @@ function setupCopyButton(button, jsonData) {
             }
         }
 
-        // Animation & Feedback
         if (success) {
             button.classList.add('copied');
             button.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
@@ -1013,13 +1259,29 @@ function setupCopyButton(button, jsonData) {
     };
 }
 
-// ===== API RESPONSE MODIFIER =====
-function modifyApiResponse(data) {
+// ===== API RESPONSE MODIFIER (UPDATED) =====
+function modifyApiResponse(data, apiType = '') {
     if (typeof data === 'object' && data !== null && !Array.isArray(data)) {
-        delete data.credit_by; delete data._credit;
+        // Remove unwanted fields - SPECIFICALLY REMOVE "credit" FIELD
+        delete data.credit_by; 
+        delete data._credit;
+        delete data.credits;
+        delete data.credit; // <-- THIS REMOVES "credit": "t.me/anshapi"
+        
+        // Add separator and developer info
         data["---------------------------------"] = "---------------------------------";
         data["developer"] = "Shahid Ansari";
-        data["powered_by"] = "NULL PROTOCOL";
+        data["powered_by"] = "NULL PROTOCOL"; // Always show "NULL PROTOCOL"
+    } else if (Array.isArray(data) && data.length > 0) {
+        // Handle array responses (like pincode API)
+        data.forEach((item, index) => {
+            if (typeof item === 'object' && item !== null) {
+                delete item.credit;
+                item["---------------------------------"] = "---------------------------------";
+                item["developer"] = "Shahid Ansari";
+                item["powered_by"] = "NULL PROTOCOL";
+            }
+        });
     }
     return data;
 }
@@ -1028,22 +1290,60 @@ function modifyApiResponse(data) {
 async function callAPI(apiUrl, type, query) {
     try {
         addLog(`Calling ${type} API for: ${query}`, "info");
-        let response; let url = apiUrl + encodeURIComponent(query);
+        let response; 
+        let url = apiUrl + encodeURIComponent(query);
+        
         try {
-            response = await fetch(url, { method: 'GET', headers: { 'Accept': 'application/json', 'User-Agent': 'Mozilla/5.0' } });
+            response = await fetch(url, { 
+                method: 'GET', 
+                headers: { 
+                    'Accept': 'application/json', 
+                    'User-Agent': 'Mozilla/5.0' 
+                } 
+            });
         } catch (fetchError) {
             addLog("Direct fetch failed, trying CORS proxy...", "warning");
-            response = await fetch(CORS_PROXY + encodeURIComponent(url), { method: 'GET', headers: { 'Accept': 'application/json' } });
+            response = await fetch(CORS_PROXY + encodeURIComponent(url), { 
+                method: 'GET', 
+                headers: { 'Accept': 'application/json' } 
+            });
         }
+        
         if (!response.ok) throw new Error(`API Error: ${response.status} ${response.statusText}`);
-        let data; const responseText = await response.text();
-        try { data = JSON.parse(responseText); } catch (parseError) { data = { response: responseText, status: "success", format: "text", note: "API returned non-JSON format" }; }
-        data = modifyApiResponse(data);
+        
+        let data; 
+        const responseText = await response.text();
+        
+        try { 
+            data = JSON.parse(responseText); 
+        } catch (parseError) { 
+            data = { 
+                response: responseText, 
+                status: "success", 
+                format: "text", 
+                note: "API returned non-JSON format" 
+            }; 
+        }
+        
+        // Apply modification
+        data = modifyApiResponse(data, type.toUpperCase());
+        
         addLog(`${type} lookup successful!`, "success");
         return { success: true, data: data };
     } catch (error) {
         addLog(`${type} API failed: ${error.message}`, "error");
-        return { success: false, error: error.message, data: { error: "API request failed", message: error.message, note: "Check console for details", "---------------------------------" : "---------------------------------", developer: "Shahid Ansari", powered_by: "NULL PROTOCOL" } };
+        return { 
+            success: false, 
+            error: error.message, 
+            data: { 
+                error: "API request failed", 
+                message: error.message, 
+                note: "Check console for details", 
+                "---------------------------------" : "---------------------------------", 
+                developer: "Shahid Ansari", 
+                powered_by: "NULL PROTOCOL" 
+            } 
+        };
     }
 }
 
@@ -1056,7 +1356,8 @@ function displayResult(resultElement, dataElement, data, copyButton) {
         if (copyButton) setupCopyButton(copyButton, formattedJSON);
         setTimeout(() => { resultElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 100);
     } catch (error) {
-        dataElement.textContent = `Error: ${error.message}`; resultElement.style.display = 'block';
+        dataElement.textContent = `Error: ${error.message}`; 
+        resultElement.style.display = 'block';
     }
 }
 
@@ -1064,40 +1365,167 @@ function displayResult(resultElement, dataElement, data, copyButton) {
 async function executePhoneLookup() {
     const num = phoneInput.value.trim();
     phoneInputError.style.display = "none";
-    if (validatePhone(num)) { phoneInputError.textContent = validatePhone(num); phoneInputError.style.display = "block"; return; }
-    phoneScanOverlay.classList.remove('hidden'); phoneSearchBtn.disabled = true; phoneResult.style.display = 'none';
-    try { const result = await callAPI(APIS.PHONE, "Phone", num); displayResult(phoneResult, phoneResultData, result.data, copyPhoneBtn); if(result.success) addHistoryEntry("Phone", num, result.data); }
-    catch (e) { displayResult(phoneResult, phoneResultData, {error: e.message}, copyPhoneBtn); }
-    finally { phoneScanOverlay.classList.add('hidden'); phoneSearchBtn.disabled = false; }
+    if (validatePhone(num)) { 
+        phoneInputError.textContent = validatePhone(num); 
+        phoneInputError.style.display = "block"; 
+        return; 
+    }
+    phoneScanOverlay.classList.remove('hidden'); 
+    phoneSearchBtn.disabled = true; 
+    phoneResult.style.display = 'none';
+    
+    try { 
+        const result = await callAPI(APIS.PHONE, "Phone", num); 
+        displayResult(phoneResult, phoneResultData, result.data, copyPhoneBtn); 
+        if(result.success) addHistoryEntry("Phone", num, result.data); 
+    } catch (e) { 
+        displayResult(phoneResult, phoneResultData, {error: e.message}, copyPhoneBtn); 
+    } finally { 
+        phoneScanOverlay.classList.add('hidden'); 
+        phoneSearchBtn.disabled = false; 
+    }
 }
 
 async function executeIFSCLookup() {
     const code = ifscInput.value.trim().toUpperCase();
     ifscInputError.style.display = "none";
-    if (validateIFSC(code)) { ifscInputError.textContent = validateIFSC(code); ifscInputError.style.display = "block"; return; }
-    ifscScanOverlay.classList.remove('hidden'); ifscSearchBtn.disabled = true; ifscResult.style.display = 'none';
-    try { const result = await callAPI(APIS.IFSC, "IFSC", code); displayResult(ifscResult, ifscResultData, result.data, copyIfscBtn); if(result.success) addHistoryEntry("IFSC", code, result.data); }
-    catch (e) { displayResult(ifscResult, ifscResultData, {error: e.message}, copyIfscBtn); }
-    finally { ifscScanOverlay.classList.add('hidden'); ifscSearchBtn.disabled = false; }
+    if (validateIFSC(code)) { 
+        ifscInputError.textContent = validateIFSC(code); 
+        ifscInputError.style.display = "block"; 
+        return; 
+    }
+    ifscScanOverlay.classList.remove('hidden'); 
+    ifscSearchBtn.disabled = true; 
+    ifscResult.style.display = 'none';
+    
+    try { 
+        const result = await callAPI(APIS.IFSC, "IFSC", code); 
+        displayResult(ifscResult, ifscResultData, result.data, copyIfscBtn); 
+        if(result.success) addHistoryEntry("IFSC", code, result.data); 
+    } catch (e) { 
+        displayResult(ifscResult, ifscResultData, {error: e.message}, copyIfscBtn); 
+    } finally { 
+        ifscScanOverlay.classList.add('hidden'); 
+        ifscSearchBtn.disabled = false; 
+    }
 }
 
 async function executeEmailLookup() {
     const email = emailInput.value.trim();
     emailInputError.style.display = "none";
-    if (validateEmail(email)) { emailInputError.textContent = validateEmail(email); emailInputError.style.display = "block"; return; }
-    emailScanOverlay.classList.remove('hidden'); emailSearchBtn.disabled = true; emailResult.style.display = 'none';
-    try { const result = await callAPI(APIS.EMAIL, "Email", email); displayResult(emailResult, emailResultData, result.data, copyEmailBtn); if(result.success) addHistoryEntry("Email", email, result.data); }
-    catch (e) { displayResult(emailResult, emailResultData, {error: e.message}, copyEmailBtn); }
-    finally { emailScanOverlay.classList.add('hidden'); emailSearchBtn.disabled = false; }
+    if (validateEmail(email)) { 
+        emailInputError.textContent = validateEmail(email); 
+        emailInputError.style.display = "block"; 
+        return; 
+    }
+    emailScanOverlay.classList.remove('hidden'); 
+    emailSearchBtn.disabled = true; 
+    emailResult.style.display = 'none';
+    
+    try { 
+        const result = await callAPI(APIS.EMAIL, "Email", email); 
+        displayResult(emailResult, emailResultData, result.data, copyEmailBtn); 
+        if(result.success) addHistoryEntry("Email", email, result.data); 
+    } catch (e) { 
+        displayResult(emailResult, emailResultData, {error: e.message}, copyEmailBtn); 
+    } finally { 
+        emailScanOverlay.classList.add('hidden'); 
+        emailSearchBtn.disabled = false; 
+    }
+}
+
+// NEW LOOKUP FUNCTIONS
+async function executeVehicleLookup() {
+    const rc = vehicleInput.value.trim().toUpperCase();
+    vehicleInputError.style.display = "none";
+    if (validateVehicle(rc)) { 
+        vehicleInputError.textContent = validateVehicle(rc); 
+        vehicleInputError.style.display = "block"; 
+        return; 
+    }
+    vehicleScanOverlay.classList.remove('hidden'); 
+    vehicleSearchBtn.disabled = true; 
+    vehicleResult.style.display = 'none';
+    
+    try { 
+        const result = await callAPI(APIS.VEHICLE, "Vehicle", rc); 
+        displayResult(vehicleResult, vehicleResultData, result.data, copyVehicleBtn); 
+        if(result.success) addHistoryEntry("Vehicle", rc, result.data); 
+    } catch (e) { 
+        displayResult(vehicleResult, vehicleResultData, {error: e.message}, copyVehicleBtn); 
+    } finally { 
+        vehicleScanOverlay.classList.add('hidden'); 
+        vehicleSearchBtn.disabled = false; 
+    }
+}
+
+async function executePincodeLookup() {
+    const pincode = pincodeInput.value.trim();
+    pincodeInputError.style.display = "none";
+    if (validatePincode(pincode)) { 
+        pincodeInputError.textContent = validatePincode(pincode); 
+        pincodeInputError.style.display = "block"; 
+        return; 
+    }
+    pincodeScanOverlay.classList.remove('hidden'); 
+    pincodeSearchBtn.disabled = true; 
+    pincodeResult.style.display = 'none';
+    
+    try { 
+        const result = await callAPI(APIS.PINCODE, "Pincode", pincode); 
+        displayResult(pincodeResult, pincodeResultData, result.data, copyPincodeBtn); 
+        if(result.success) addHistoryEntry("Pincode", pincode, result.data); 
+    } catch (e) { 
+        displayResult(pincodeResult, pincodeResultData, {error: e.message}, copyPincodeBtn); 
+    } finally { 
+        pincodeScanOverlay.classList.add('hidden'); 
+        pincodeSearchBtn.disabled = false; 
+    }
+}
+
+async function executeGSTLookup() {
+    const gst = gstInput.value.trim().toUpperCase();
+    gstInputError.style.display = "none";
+    if (validateGST(gst)) { 
+        gstInputError.textContent = validateGST(gst); 
+        gstInputError.style.display = "block"; 
+        return; 
+    }
+    gstScanOverlay.classList.remove('hidden'); 
+    gstSearchBtn.disabled = true; 
+    gstResult.style.display = 'none';
+    
+    try { 
+        const result = await callAPI(APIS.GST, "GST", gst); 
+        displayResult(gstResult, gstResultData, result.data, copyGstBtn); 
+        if(result.success) addHistoryEntry("GST", gst, result.data); 
+    } catch (e) { 
+        displayResult(gstResult, gstResultData, {error: e.message}, copyGstBtn); 
+    } finally { 
+        gstScanOverlay.classList.add('hidden'); 
+        gstSearchBtn.disabled = false; 
+    }
 }
 
 // ===== LISTENERS =====
 phoneSearchBtn.addEventListener('click', executePhoneLookup);
 phoneInput.addEventListener('keydown', (e) => { if (e.key === "Enter") executePhoneLookup(); });
+
 ifscSearchBtn.addEventListener('click', executeIFSCLookup);
 ifscInput.addEventListener('keydown', (e) => { if (e.key === "Enter") executeIFSCLookup(); });
+
 emailSearchBtn.addEventListener('click', executeEmailLookup);
 emailInput.addEventListener('keydown', (e) => { if (e.key === "Enter") executeEmailLookup(); });
+
+// NEW LISTENERS
+vehicleSearchBtn.addEventListener('click', executeVehicleLookup);
+vehicleInput.addEventListener('keydown', (e) => { if (e.key === "Enter") executeVehicleLookup(); });
+
+pincodeSearchBtn.addEventListener('click', executePincodeLookup);
+pincodeInput.addEventListener('keydown', (e) => { if (e.key === "Enter") executePincodeLookup(); });
+
+gstSearchBtn.addEventListener('click', executeGSTLookup);
+gstInput.addEventListener('keydown', (e) => { if (e.key === "Enter") executeGSTLookup(); });
 
 // ===== NAVIGATION =====
 menuItems.forEach(item => {
@@ -1105,8 +1533,14 @@ menuItems.forEach(item => {
         const tabId = item.getAttribute('data-tab');
         menuItems.forEach(i => i.classList.remove('active'));
         item.classList.add('active');
-        document.querySelectorAll('.tab').forEach(sec => { sec.style.display = (sec.id === tabId) ? 'block' : 'none'; });
-        if (TAB_CONFIG[tabId]) { currentTabTitle.textContent = TAB_CONFIG[tabId].title; currentTabSub.textContent = TAB_CONFIG[tabId].sub; }
+        document.querySelectorAll('.tab').forEach(sec => { 
+            sec.style.display = (sec.id === tabId) ? 'block' : 'none'; 
+        });
+        
+        if (TAB_CONFIG[tabId]) { 
+            currentTabTitle.textContent = TAB_CONFIG[tabId].title; 
+            currentTabSub.textContent = TAB_CONFIG[tabId].sub; 
+        }
         
         // Auto-close sidebar on mobile when clicked
         if (window.innerWidth <= 900) toggleMenu();
@@ -1123,12 +1557,20 @@ historyTableBody.addEventListener('click', (e) => {
         let targetTab = 'phoneTab';
         if (entry.type === 'IFSC') targetTab = 'ifscTab';
         if (entry.type === 'Email') targetTab = 'emailTab';
+        if (entry.type === 'Vehicle') targetTab = 'vehicleTab';
+        if (entry.type === 'Pincode') targetTab = 'pincodeTab';
+        if (entry.type === 'GST') targetTab = 'gstTab';
+        
         const targetMenu = document.querySelector(`.menu-item[data-tab="${targetTab}"]`);
         if (targetMenu) {
             targetMenu.click();
             if (targetTab === 'phoneTab') phoneInput.value = entry.query;
             if (targetTab === 'ifscTab') ifscInput.value = entry.query;
             if (targetTab === 'emailTab') emailInput.value = entry.query;
+            if (targetTab === 'vehicleTab') vehicleInput.value = entry.query;
+            if (targetTab === 'pincodeTab') pincodeInput.value = entry.query;
+            if (targetTab === 'gstTab') gstInput.value = entry.query;
+            
             addLog(`Reloaded: ${entry.query}`, "success");
         }
     }
@@ -1136,14 +1578,34 @@ historyTableBody.addEventListener('click', (e) => {
 
 // ===== SYSTEM METRICS =====
 if (sysIdEl) sysIdEl.textContent = "SYS-" + Math.floor(Math.random() * 9000 + 1000);
+
 async function getRealIP() {
     const sources = ["https://api.ipify.org?format=json", "https://ipinfo.io/json", "https://api64.ipify.org?format=json"];
-    for (let url of sources) { try { const res = await fetch(url); if (!res.ok) continue; const data = await res.json(); const ip = data.ip || data.query || data.client_ip; if (ip) { document.getElementById('userIP').textContent = ip; return; } } catch(e) {} }
+    for (let url of sources) { 
+        try { 
+            const res = await fetch(url); 
+            if (!res.ok) continue; 
+            const data = await res.json(); 
+            const ip = data.ip || data.query || data.client_ip; 
+            if (ip) { 
+                document.getElementById('userIP').textContent = ip; 
+                return; 
+            } 
+        } catch(e) {} 
+    }
     document.getElementById('userIP').textContent = "Unavailable";
 }
-try { document.getElementById('timeZone').textContent = Intl.DateTimeFormat().resolvedOptions().timeZone || "Unknown"; } catch {}
-function updateClock() { const el = document.getElementById('timeClock'); if(el) el.textContent = new Date().toLocaleTimeString(); }
-updateClock(); setInterval(updateClock, 1000);
+
+try { 
+    document.getElementById('timeZone').textContent = Intl.DateTimeFormat().resolvedOptions().timeZone || "Unknown"; 
+} catch {}
+
+function updateClock() { 
+    const el = document.getElementById('timeClock'); 
+    if(el) el.textContent = new Date().toLocaleTimeString(); 
+}
+updateClock(); 
+setInterval(updateClock, 1000);
 
 if ('getBattery' in navigator) {
     navigator.getBattery().then(battery => {
@@ -1151,32 +1613,99 @@ if ('getBattery' in navigator) {
             document.getElementById('batteryMain').textContent = `${Math.round(battery.level * 100)}%`;
             document.getElementById('batteryStatus').textContent = `Status: ${battery.level >= 0.4 ? (battery.level >= 0.8 ? "Good" : "Moderate") : "Low"}${battery.charging ? " (Charging)" : ""}`;
         }
-        updateBattery(); battery.addEventListener('levelchange', updateBattery); battery.addEventListener('chargingchange', updateBattery);
+        updateBattery(); 
+        battery.addEventListener('levelchange', updateBattery); 
+        battery.addEventListener('chargingchange', updateBattery);
     }).catch(() => { document.getElementById('batteryMain').textContent = "Not accessible"; });
-} else { document.getElementById('batteryMain').textContent = "Not supported"; }
+} else { 
+    document.getElementById('batteryMain').textContent = "Not supported"; 
+}
 
 function estimateDeviceModel(){
     const ua = navigator.userAgent || "";
     if (/iPhone/.test(ua)) return "Apple iPhone";
     if (/iPad/.test(ua)) return "Apple iPad";
-    if (/Android/.test(ua)) { const m = ua.match(/Android.+; (.+?) Build/); return m ? `${m[1].trim()}` : "Android Device"; }
+    if (/Android/.test(ua)) { 
+        const m = ua.match(/Android.+; (.+?) Build/); 
+        return m ? `${m[1].trim()}` : "Android Device"; 
+    }
     if (/Windows/.test(ua)) return "Windows Device";
     return "Unknown Device";
 }
 document.getElementById('deviceModel').textContent = estimateDeviceModel();
-function detectConnection(){ try{ const n = navigator; if (n.connection && n.connection.effectiveType) return n.connection.effectiveType === '4g' ? '4G / Good' : n.connection.effectiveType.toUpperCase(); return navigator.onLine ? 'Online' : 'Offline'; } catch(e){ return 'Unknown'; } }
+
+function detectConnection(){ 
+    try{ 
+        const n = navigator; 
+        if (n.connection && n.connection.effectiveType) return n.connection.effectiveType === '4g' ? '4G / Good' : n.connection.effectiveType.toUpperCase(); 
+        return navigator.onLine ? 'Online' : 'Offline'; 
+    } catch(e){ 
+        return 'Unknown'; 
+    } 
+}
 document.getElementById('connType').textContent = detectConnection();
-const ramEl = document.getElementById('ramInfo'); if (ramEl) { if ('deviceMemory' in navigator) { ramEl.textContent = `${navigator.deviceMemory} GB (approx)`; } else { ramEl.textContent = (navigator.hardwareConcurrency || 2) > 4 ? "8+ GB (approx)" : "4 - 8 GB (approx)"; } }
-function cpuBenchmarkSample(iter = 100000) { const start = performance.now(); let x = 0; for (let i = 0; i < iter; i++) x += Math.sin(i); const score = Math.max(1, Math.round(10000 / ((performance.now() - start) + 1))); return { score }; }
-try { document.getElementById('cpuScore').textContent = `${cpuBenchmarkSample().score} (perf)`; } catch (e) { document.getElementById('cpuScore').textContent = "N/A"; }
-function fingerprintScore() { let s = 0; try { if (navigator.doNotTrack) s+=5; if (navigator.language) s+=5; if (navigator.userAgent) s+=5; s += (navigator.hardwareConcurrency || 2); s = Math.min(100, Math.round(s * 6)); } catch (e) { s=10; } return s; }
+
+const ramEl = document.getElementById('ramInfo'); 
+if (ramEl) { 
+    if ('deviceMemory' in navigator) { 
+        ramEl.textContent = `${navigator.deviceMemory} GB (approx)`; 
+    } else { 
+        ramEl.textContent = (navigator.hardwareConcurrency || 2) > 4 ? "8+ GB (approx)" : "4 - 8 GB (approx)"; 
+    } 
+}
+
+function cpuBenchmarkSample(iter = 100000) { 
+    const start = performance.now(); 
+    let x = 0; 
+    for (let i = 0; i < iter; i++) x += Math.sin(i); 
+    const score = Math.max(1, Math.round(10000 / ((performance.now() - start) + 1))); 
+    return { score }; 
+}
+
+try { 
+    document.getElementById('cpuScore').textContent = `${cpuBenchmarkSample().score} (perf)`; 
+} catch (e) { 
+    document.getElementById('cpuScore').textContent = "N/A"; 
+}
+
+function fingerprintScore() { 
+    let s = 0; 
+    try { 
+        if (navigator.doNotTrack) s+=5; 
+        if (navigator.language) s+=5; 
+        if (navigator.userAgent) s+=5; 
+        s += (navigator.hardwareConcurrency || 2); 
+        s = Math.min(100, Math.round(s * 6)); 
+    } catch (e) { 
+        s=10; 
+    } 
+    return s; 
+}
 document.getElementById('bfScore').textContent = `${fingerprintScore()}%`;
-const screenEl = document.getElementById('screenMetrics'); if (screenEl) { const s = window.screen; screenEl.textContent = `${s.width} x ${s.height} px, ${window.devicePixelRatio} DPR`; }
-const storageEl = document.getElementById('storageInfo'); if (storageEl) { if (navigator.storage && navigator.storage.estimate) { navigator.storage.estimate().then(est => { storageEl.textContent = `${(est.usage/1e9).toFixed(2)} GB used / ${(est.quota/1e9).toFixed(2)} GB (est)`; }).catch(() => { storageEl.textContent = "N/A"; }); } else { storageEl.textContent = "Not supported"; } }
+
+const screenEl = document.getElementById('screenMetrics'); 
+if (screenEl) { 
+    const s = window.screen; 
+    screenEl.textContent = `${s.width} x ${s.height} px, ${window.devicePixelRatio} DPR`; 
+}
+
+const storageEl = document.getElementById('storageInfo'); 
+if (storageEl) { 
+    if (navigator.storage && navigator.storage.estimate) { 
+        navigator.storage.estimate().then(est => { 
+            storageEl.textContent = `${(est.usage/1e9).toFixed(2)} GB used / ${(est.quota/1e9).toFixed(2)} GB (est)`; 
+        }).catch(() => { 
+            storageEl.textContent = "N/A"; 
+        }); 
+    } else { 
+        storageEl.textContent = "Not supported"; 
+    } 
+}
 
 // Init
-getRealIP(); renderHistoryTable();
-addLog("System initialized.", "success");
+getRealIP(); 
+renderHistoryTable();
+addLog("System initialized with Vehicle, Pincode & GST lookup support.", "success");
 </script>
 </body>
 </html>
